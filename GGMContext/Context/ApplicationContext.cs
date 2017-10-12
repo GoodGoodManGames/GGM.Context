@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using GGMContext.Context.Attribute;
+﻿using System.Reflection;
 using GGMContext.Context.Factory;
 
 namespace GGMContext.Context
@@ -14,9 +10,6 @@ namespace GGMContext.Context
             ApplicationAssembly = assembly;
         }
 
-        public Assembly ApplicationAssembly { get; private set; }
+        public Assembly ApplicationAssembly { get; }
     }
-
-
-
 }

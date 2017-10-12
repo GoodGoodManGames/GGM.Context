@@ -8,6 +8,5 @@ namespace GGMContext.Context.Attribute
     [AttributeUsage(AttributeTargets.Constructor)]
     public class AutoWiredAttribute : System.Attribute
     {
-        
     }
 }

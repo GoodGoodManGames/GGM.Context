@@ -2,7 +2,7 @@
 
 namespace GGMContext.Context.Factory
 {
-    interface IManagedClassFactory
+    public interface IManagedClassFactory
     {
         object GetManagedObject(Type targetType);
         object InstantiateManagedObject(Type managedObjectType);

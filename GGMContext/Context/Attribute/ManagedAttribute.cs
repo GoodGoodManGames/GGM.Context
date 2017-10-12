@@ -12,7 +12,10 @@ namespace GGMContext.Context.Attribute
         {
             ClassType = managedClassType;
         }
-        
+     
+        /// <summary>
+        ///     생명주기 타입을 지정합니다.
+        /// </summary>
         public ManagedClassType ClassType { get; private set; }
     }
 }

@@ -9,40 +9,20 @@ namespace GGMContext.Context.Factory
 {
     public class ManagedClassFactory : IManagedClassFactory
     {
-        delegate object GetInstanceDelegate();
+        private readonly Dictionary<Type, GetInstanceDelegate> _managedClassGetter = new Dictionary<Type, GetInstanceDelegate>();
+        private readonly Dictionary<Type, object> _managedClassLookUp = new Dictionary<Type, object>();
 
         public ManagedClassFactory(Assembly assembly)
         {
             var managedClasses = assembly.GetTypes().Where(type => type.IsDefined(typeof(ManagedAttribute), true));
             foreach (var managedClass in managedClasses)
             {
-                if(_managedClassGetter.ContainsKey(managedClass))
+                if (_managedClassGetter.ContainsKey(managedClass))
                     continue;
 
                 _managedClassGetter[managedClass] = CreateGetter(managedClass);
             }
         }
-
-        private GetInstanceDelegate CreateGetter(Type targetType)
-        {
-            if (_managedClassGetter.ContainsKey(targetType))
-                return _managedClassGetter[targetType];
-            
-            var managedAttribute = targetType.GetCustomAttribute<ManagedAttribute>(true);
-            if (managedAttribute.ClassType == ManagedClassType.Singleton)
-            {
-                _managedClassLookUp[targetType] = InstantiateManagedObject(targetType);
-                return _managedClassGetter[targetType] = () => _managedClassLookUp[targetType];
-            }
-            else
-            {
-                return _managedClassGetter[targetType] = MakeConstructorDelegate(targetType);
-            }
-        }
-        
-
-        private readonly Dictionary<Type, object> _managedClassLookUp = new Dictionary<Type, object>();
-        private readonly Dictionary<Type, GetInstanceDelegate> _managedClassGetter = new Dictionary<Type, GetInstanceDelegate>();
 
         public T GetManagedObject<T>() where T : class
         {
@@ -68,15 +48,29 @@ namespace GGMContext.Context.Factory
             // ManagedClassType.Proto와 다르게 싱글턴이기 때문에 성능을 따로 고려하지 않음.
             var autoWiredConstructor = managedObjectType.GetConstructors()
                 .FirstOrDefault(info => info.IsDefined(typeof(AutoWiredAttribute), true));
-            
+
             if (autoWiredConstructor == null)
                 return Activator.CreateInstance(managedObjectType);
 
             var parameterInfos = autoWiredConstructor.GetParameters();
-            var parameters = parameterInfos.Select(info => CreateGetter(info.ParameterType)() ).ToArray();
+            var parameters = parameterInfos.Select(info => CreateGetter(info.ParameterType)()).ToArray();
             return autoWiredConstructor.Invoke(parameters);
         }
-        
+
+        private GetInstanceDelegate CreateGetter(Type targetType)
+        {
+            if (_managedClassGetter.ContainsKey(targetType))
+                return _managedClassGetter[targetType];
+
+            var managedAttribute = targetType.GetCustomAttribute<ManagedAttribute>(true);
+            if (managedAttribute.ClassType == ManagedClassType.Singleton)
+            {
+                _managedClassLookUp[targetType] = InstantiateManagedObject(targetType);
+                return _managedClassGetter[targetType] = () => _managedClassLookUp[targetType];
+            }
+            return _managedClassGetter[targetType] = MakeConstructorDelegate(targetType);
+        }
+
         private GetInstanceDelegate MakeConstructorDelegate(Type managedClass)
         {
             var constructorInfos = managedClass.GetConstructors();
@@ -91,14 +85,14 @@ namespace GGMContext.Context.Factory
 
             var parameterTypes = constructor.GetParameters().Select(info => info.ParameterType).ToArray();
             var parameterExpressions = parameterTypes.Select(Expression.Parameter).ToArray();
-            NewExpression newExp = Expression.New(constructor, parameterExpressions);
+            var newExp = Expression.New(constructor, parameterExpressions);
 
             var parameterBindExpressions = new List<Expression>(parameterTypes.Length + 1);
-            for (int i = 0; i < parameterTypes.Length; i++)
+            for (var i = 0; i < parameterTypes.Length; i++)
             {
-                Type parameterType = parameterTypes[i];
-                Expression assignExpression = _managedClassLookUp.ContainsKey(parameterType)
-                    ? (Expression) Expression.Constant(_managedClassGetter[parameterType] ())
+                var parameterType = parameterTypes[i];
+                var assignExpression = _managedClassLookUp.ContainsKey(parameterType)
+                    ? (Expression)Expression.Constant(_managedClassGetter[parameterType]())
                     : Expression.Call(MakeConstructorDelegate(parameterType).Method);
 
                 parameterBindExpressions.Add(Expression.Assign(parameterExpressions[i], assignExpression));
@@ -108,5 +102,7 @@ namespace GGMContext.Context.Factory
 
             return Expression.Lambda<GetInstanceDelegate>(block).Compile();
         }
+
+        private delegate object GetInstanceDelegate();
     }
 }
