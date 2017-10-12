@@ -91,8 +91,9 @@ namespace GGMContext.Context.Factory
             for (var i = 0; i < parameterTypes.Length; i++)
             {
                 var parameterType = parameterTypes[i];
-                var assignExpression = _managedClassLookUp.ContainsKey(parameterType)
-                    ? (Expression)Expression.Constant(_managedClassGetter[parameterType]())
+                var managedAttribute = parameterType.GetCustomAttribute<ManagedAttribute>(true);
+                var assignExpression = managedAttribute.ClassType == ManagedClassType.Singleton
+                    ? (Expression)Expression.Constant(CreateGetter(parameterType) ())
                     : Expression.Call(MakeConstructorDelegate(parameterType).Method);
 
                 parameterBindExpressions.Add(Expression.Assign(parameterExpressions[i], assignExpression));
