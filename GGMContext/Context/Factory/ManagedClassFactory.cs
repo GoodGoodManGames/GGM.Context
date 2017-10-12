@@ -38,6 +38,20 @@ namespace GGMContext.Context.Factory
         {
             return _managedClassGetter[targetType]();
         }
+        
+        private GetInstanceDelegate CreateGetter(Type targetType)
+        {
+            if (_managedClassGetter.ContainsKey(targetType))
+                return _managedClassGetter[targetType];
+
+            var managedAttribute = targetType.GetCustomAttribute<ManagedAttribute>(true);
+            if (managedAttribute.ClassType == ManagedClassType.Singleton)
+            {
+                _managedClassLookUp[targetType] = InstantiateManagedObject(targetType);
+                return _managedClassGetter[targetType] = () => _managedClassLookUp[targetType];
+            }
+            return _managedClassGetter[targetType] = MakeConstructorDelegate(targetType);
+        }
 
         public object InstantiateManagedObject(Type managedObjectType)
         {
@@ -55,20 +69,6 @@ namespace GGMContext.Context.Factory
             var parameterInfos = autoWiredConstructor.GetParameters();
             var parameters = parameterInfos.Select(info => CreateGetter(info.ParameterType)()).ToArray();
             return autoWiredConstructor.Invoke(parameters);
-        }
-
-        private GetInstanceDelegate CreateGetter(Type targetType)
-        {
-            if (_managedClassGetter.ContainsKey(targetType))
-                return _managedClassGetter[targetType];
-
-            var managedAttribute = targetType.GetCustomAttribute<ManagedAttribute>(true);
-            if (managedAttribute.ClassType == ManagedClassType.Singleton)
-            {
-                _managedClassLookUp[targetType] = InstantiateManagedObject(targetType);
-                return _managedClassGetter[targetType] = () => _managedClassLookUp[targetType];
-            }
-            return _managedClassGetter[targetType] = MakeConstructorDelegate(targetType);
         }
 
         private GetInstanceDelegate MakeConstructorDelegate(Type managedClass)
