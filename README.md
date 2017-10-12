@@ -14,6 +14,9 @@ GGMContext는 Setter Injection을 지원하지 않으므로, 오직 Constructor 
 
 > Spring에서의 Context는 Bean[Factory]와의 연관을 빼 놓을 수 없지만, GGMContext는 Bean[Factory]에 해당하는 부분을 전부 '코드에 Attribute를 지정함으로서' 대체합니다. 그러므로 굳이 Bean이나 BeanConfiguration class를 작성할 필요가 없습니다.
 
+> **Expression**
+DI 시 (Reflaction을 이용한)동적 메소드 호출의 성능 저하를 최소화 하기 위해 Expression Tree를 써 동적으로 람다를 만들어  컴파일 한 뒤 호출한다.
+
 ### Managed Class
 GGMContext에 의해 생성되고, 관리되는 객체의 클래스를 ManagedClass라고 합니다.
 이는 ApplicationContext의 Scan의 대상이 됩니다. ManagedClass가 지정된 클래스들은 Lookup되어 DI에 사용됩니다.
@@ -31,24 +34,27 @@ namespace Demo
         }
     }
 
-    [Controller] // ApplicationContext에 의해 생성되어 Lookup된다.
+    [Managed(ManagedClassType.Singleton)] // ApplicationContext에 의해 생성되어 Lookup된다.
     public class TestController
     {
         // ApplicationContext에 의해 생성될때 인자들을 주입받는다.
+        // TestManagedClass는 ManagedClassType.Singleton이기 때문에 별다른 생성 없이 룩업 테이블에서 가져와 주입된다.
+        // TestService는 ManagedClassType.Proto이기 때문에 매 주입 시 마다 새로 생성된다.
         [AutoWired]
-        public TestController(TestService testService, TestManagedClass dummy)
+        public TestController(TestManagedClass dummy, TestService testService)
         {
             /** */
         }
     }
 
-    [Managed] // ApplicationContext에 의해 생성되어 Lookup된다.
+    [Managed(ManagedClassType.Singleton)] // ApplicationContext에 의해 생성되어 Lookup된다.
     public class TestManagedClass
     {
         /** */
     }
 
-    [Service] // ApplicationContext에 의해 생성되어 Lookup된다.
+    [Managed(ManagedClassType.Proto)] // ApplicationContext에 의해 생성되어 생성 Delegate가 Lookup된다.
+                                      // 생성자가 아닌 Delegate를 Lookup하는 이유는 속도때문.
     public class TestService
     {
         /** */
