@@ -1,8 +1,5 @@
-﻿using GGMContext.Context;
-using GGMContext.Context.Attribute;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using GGM.Context;
+using GGM.Context.Attribute;
 
 namespace UnitTest.Dummy
 {
