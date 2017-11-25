@@ -3,7 +3,7 @@
     /// <summary>
     ///     ManagedClass의 생명주기 타입
     /// </summary>
-    public enum ManagedClassType
+    public enum ManagedType
     {
         /// <summary>
         ///     ManagedPool에서 오직 하나만 존재합니다. 이는 ApplicationContext와 수명을 같이합니다.

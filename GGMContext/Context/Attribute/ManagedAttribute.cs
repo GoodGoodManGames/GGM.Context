@@ -8,14 +8,14 @@ namespace GGMContext.Context.Attribute
     [AttributeUsage(AttributeTargets.Class)]
     public class ManagedAttribute : System.Attribute
     {
-        public ManagedAttribute(ManagedClassType managedClassType)
+        public ManagedAttribute(ManagedType managedType)
         {
-            ClassType = managedClassType;
+            ManagedType = managedType;
         }
      
         /// <summary>
         ///     생명주기 타입을 지정합니다.
         /// </summary>
-        public ManagedClassType ClassType { get; private set; }
+        public ManagedType ManagedType { get; private set; }
     }
 }

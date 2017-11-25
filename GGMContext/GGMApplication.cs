@@ -15,14 +15,14 @@ namespace GGMContext
         public string[] Arguments { get; }
 
         public Assembly ApplicationAssembly { get; private set; }
-        public ApplicationContext Context { get; private set; }
+        public ManagedContext Context { get; private set; }
 
-        public static ApplicationContext Run(Type applicationClass, string[] args)
+        public static ManagedContext Run(Type applicationClass, string[] args)
         {
             return new GGMApplication(args).Run(applicationClass);
         }
 
-        private ApplicationContext Run(Type applicationClass)
+        private ManagedContext Run(Type applicationClass)
         {
             ApplicationAssembly = applicationClass.Assembly;
             Context = new ApplicationContext(ApplicationAssembly);

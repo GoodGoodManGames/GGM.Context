@@ -1,15 +1,33 @@
-﻿using System.Reflection;
-using GGMContext.Context.Factory;
+﻿using GGMContext.Context.Attribute;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 
 namespace GGMContext.Context
 {
-    public class ApplicationContext : ManagedClassFactory
+    public class ApplicationContext : ManagedContext
     {
-        public ApplicationContext(Assembly assembly) : base(assembly)
+        public ApplicationContext(Assembly assembly)
         {
-            ApplicationAssembly = assembly;
+            Assembly = assembly;
+
+            var allTypes = Assembly.GetTypes();
+            var managedTypes = allTypes
+                .Where(type => type.IsDefined(typeof(ManagedAttribute)))
+                .ToDictionary(type => type, type => type.GetCustomAttribute<ManagedAttribute>());
+
+            // Singleton들은 미리 생성.
+            foreach(var managedType in managedTypes)
+            {
+                // Key : type
+                // Value : ManagedAttribute
+                if (managedType.Value.ManagedType == ManagedType.Singleton)
+                    GetManaged(managedType.Key);
+            }
         }
 
-        public Assembly ApplicationAssembly { get; }
+        public Assembly Assembly { get; }
     }
 }
