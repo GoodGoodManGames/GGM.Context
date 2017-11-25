@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GGMContext.Context.Attribute
+namespace GGM.Context.Attribute
 {
     /// <summary>
     ///     클래스가 ManagedClass임을 지정합니다.

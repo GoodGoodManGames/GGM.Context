@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Reflection;
-using GGMContext.Context;
+using GGM.Context;
 
-namespace GGMContext
+namespace GGM
 {
     public class GGMApplication
     {

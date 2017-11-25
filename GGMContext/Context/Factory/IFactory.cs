@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace GGMContext.Context.Factory
+namespace GGM.Context.Factory
 {
     /// <summary>
     ///     객체를 만들어 내는 Factory의 인터페이스입니다.

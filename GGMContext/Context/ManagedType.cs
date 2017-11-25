@@ -1,4 +1,4 @@
-﻿namespace GGMContext.Context
+﻿namespace GGM.Context
 {
     /// <summary>
     ///     ManagedClass의 생명주기 타입

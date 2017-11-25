@@ -1,9 +1,7 @@
-﻿using GGMContext.Context.Attribute;
+﻿using GGM.Context.Attribute;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace GGMContext.Context
+namespace GGM.Context
 {
     internal class ManagedInfo
     {

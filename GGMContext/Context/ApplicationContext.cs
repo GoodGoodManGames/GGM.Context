@@ -1,11 +1,8 @@
-﻿using GGMContext.Context.Attribute;
-using System;
-using System.Collections.Generic;
+﻿using GGM.Context.Attribute;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
-namespace GGMContext.Context
+namespace GGM.Context
 {
     public class ApplicationContext : ManagedContext
     {

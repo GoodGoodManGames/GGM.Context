@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GGMContext.Context.Attribute
+namespace GGM.Context.Attribute
 {
     /// <summary>
     ///     생성자가 의존성을 주입받을 것을 지정합니다.

@@ -1,12 +1,12 @@
-﻿using GGMContext.Context.Attribute;
-using GGMContext.Context.Exception;
-using GGMContext.Context.Factory;
+﻿using GGM.Context.Attribute;
+using GGM.Context.Exception;
+using GGM.Context.Factory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace GGMContext.Context
+namespace GGM.Context
 {
     /// <summary>
     ///     Managed가 태그된 객체들을 보관하고, 질의하는 클래스입니다.

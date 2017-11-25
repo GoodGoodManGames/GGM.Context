@@ -1,14 +1,11 @@
-﻿using GGMContext.Context.Attribute;
-using GGMContext.Context.Exception;
+﻿using GGM.Context.Exception;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
 using static System.Reflection.Emit.OpCodes;
 
-namespace GGMContext.Context.Factory
+namespace GGM.Context.Factory
 {
     /// <summary>
     ///     Managed객체들을 런타임에 생성하는 ManagedFactory입니다.
