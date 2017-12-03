@@ -10,7 +10,7 @@
     public class CreateManagedException : System.Exception
     {
         public CreateManagedException(CreateManagedError createManagedError) 
-            : base($"{nameof(CreateManagedError)} : {createManagedError} - 객체 생성에 실패하였습니다.")
+            : base($"Fail to create managed. {nameof(CreateManagedError)} : {createManagedError}")
         {
             CreateManagedError = createManagedError;
         }
