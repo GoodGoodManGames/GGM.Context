@@ -23,7 +23,7 @@ namespace GGM.Context.Factory
         /// <param name="type">생성할 클래스타입</param>
         /// <param name="parameters">생성시 사용될 인자</param>
         /// <returns>생성된 객체</returns>
-        public object Create(Type type, object[] parameters = null)
+        public virtual object Create(Type type, object[] parameters = null)
         {
             var generator = GetCachedGeneratorInternal(type, parameters);
             return generator(parameters);
@@ -35,7 +35,7 @@ namespace GGM.Context.Factory
         /// <typeparam name="T">생성할 클래스 다입</typeparam>
         /// <param name="parameters">생성시 사용될 인자</param>
         /// <returns>생성된 객체</returns>
-        public T Create<T>(object[] parameters = null) where T : class => Create(typeof(T), parameters) as T;
+        public virtual T Create<T>(object[] parameters = null) where T : class => Create(typeof(T), parameters) as T;
 
         private Ganerator GetCachedGeneratorInternal(Type type, object[] parameters)
         {
