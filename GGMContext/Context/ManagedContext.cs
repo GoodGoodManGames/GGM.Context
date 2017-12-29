@@ -15,9 +15,9 @@ namespace GGM.Context
     {
         private Dictionary<Type, ManagedInfo> mManagedInfos = new Dictionary<Type, ManagedInfo>();
 
-        public T GetManaged<T>() where T : class => GetManaged(typeof(T)) as T;
+        public virtual T GetManaged<T>() where T : class => GetManaged(typeof(T)) as T;
 
-        public object GetManaged(Type type)
+        public virtual object GetManaged(Type type)
         {
             if (mManagedInfos.TryGetValue(type, out ManagedInfo cachedManagedInfo))
                 return cachedManagedInfo.Object;
