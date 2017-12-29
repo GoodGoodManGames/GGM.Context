@@ -1,5 +1,5 @@
 # GGMContext
-GGMContext는 GGM Framework에서 IoC 컨테이너 역할을 수행하는 Core 부분입니다.
+GGMContext는 GGM Framework에서 DI와 IoC 컨테이너 역할을 수행하는 Core 부분입니다.
 
 이는 Spring의 Core(Bean, Context)에서 영감을 얻었으며, 모든 GGM Framework는 GGMContext위에 구현됩니다.
 
@@ -14,8 +14,8 @@ GGMContext는 Setter Injection을 지원하지 않으므로, 오직 Constructor 
 
 > Spring에서의 Context는 Bean[Factory]와의 연관을 빼 놓을 수 없지만, GGMContext는 Bean[Factory]에 해당하는 부분을 전부 '코드에 Attribute를 지정함으로서' 대체합니다. 그러므로 굳이 Bean이나 BeanConfiguration class를 작성할 필요가 없습니다.
 
-> **Expression**
-DI 시 (Reflaction을 이용한)동적 메소드 호출의 성능 저하를 최소화 하기 위해 Expression Tree를 써 동적으로 람다를 만들어  컴파일 한 뒤 호출한다.
+> **IL.Emit**
+DI 시 (Reflaction을 이용한)동적 메소드 호출의 성능 저하를 최소화 하기 위해 IL.Emit을 사용하여 동적으로 메소드를 만들어  컴파일 한 뒤 호출합니다..
 
 ### Managed Class
 GGMContext에 의해 생성되고, 관리되는 객체의 클래스를 ManagedClass라고 합니다.
@@ -23,45 +23,44 @@ GGMContext에 의해 생성되고, 관리되는 객체의 클래스를 ManagedCl
 
 ## Example
 ```cs
-namespace Demo
+
+[Managed(ManagedClassType.Singleton)] // ApplicationContext에 의해 생성되어 Lookup된다.
+public class TestController
 {
-    public class Program
-    {
-        static void Main(string[] args)
-        {
-            // 프레임워크 실행, Context가 생성되며 하위 네임스페이스의 Managed Class를 생성하여 Lookup한다.
-            Application.Run(typeof(Program));
-        }
-    }
-
-    [Managed(ManagedClassType.Singleton)] // ApplicationContext에 의해 생성되어 Lookup된다.
-    public class TestController
-    {
-        // ApplicationContext에 의해 생성될때 인자들을 주입받는다.
-        // TestManagedClass는 ManagedClassType.Singleton이기 때문에 별다른 생성 없이 룩업 테이블에서 가져와 주입된다.
-        // TestService는 ManagedClassType.Proto이기 때문에 매 주입 시 마다 새로 생성된다.
-        [AutoWired]
-        public TestController(TestManagedClass dummy, TestService testService)
-        {
-            /** */
-        }
-    }
-
-    [Managed(ManagedClassType.Singleton)] // ApplicationContext에 의해 생성되어 Lookup된다.
-    public class TestManagedClass
+    // ApplicationContext에 의해 생성될때 인자들을 주입받는다.
+    // TestManagedClass는 Singleton이기 때문에 별다른 생성 없이 룩업 테이블에서 가져와 주입된다.
+    // TestService는 Proto이기 때문에 매 주입 시 마다 새로 생성된다.
+    [AutoWired]
+    public TestController(SingletonManaged singletonManaged, ProtoManaged protoManaged)
     {
         /** */
     }
 
-    [Managed(ManagedClassType.Proto)] // ApplicationContext에 의해 생성되어 생성 Delegate가 Lookup된다.
-                                      // 생성자가 아닌 Delegate를 Lookup하는 이유는 속도때문.
-    public class TestService
-    {
-        /** */
-    }
+    SingletonManaged Singleton { get; set; }
+    ProtoManaged Proto { get; set; }
 }
-```
 
-## 추후 작업 목표
-- [ ] ManagedClass 지정시 여러 LifeCycle Type 지정 가능하게끔
-  - Proto(주입 될 때 마다 생성), Connection(한 Connection에서만) 등
+[Managed(ManagedClassType.Singleton)]
+public class SingletonManaged
+{
+    /** */
+}
+
+[Managed(ManagedClassType.Proto)]
+public class ProtoManaged
+{
+    /** */
+}
+
+public static void Main(string[] args)
+{
+    var context = new ManagedContext();
+    var singleto = context.GetManaged<SingletonManaged>();
+    var proto = context.GetManaged<ProtoManaged>();
+    var testController = context.GetManaged<TestController>();
+
+    Console.WriteLine(testController.Singleton == singleton); // true
+    Console.WriteLine(testController.proto == proto); // false
+}
+
+```
