@@ -25,14 +25,9 @@ namespace GGM.Context
             var managedAttribute = type.GetCustomAttribute<ManagedAttribute>();
             if (managedAttribute == null) throw new CreateManagedException(CreateManagedError.NotManagedClass);
 
-            var constructorInfo = type.GetConstructors().FirstOrDefault(info => info.IsDefined(typeof(AutoWiredAttribute)));
-            if (constructorInfo == null)
-            {
-                constructorInfo = type.GetConstructor(Type.EmptyTypes);
-                Console.WriteLine($"{type}의 AutoWired 생성자가 없어 기본 생성자를 사용합니다.");
-            }
+            var parameterInfos = GetInjectedParameters(type);
+            var parameters = parameterInfos.Select(info => GetManaged(info.ParameterType)).ToArray();
 
-            var parameters = constructorInfo.GetParameters().Select(info => GetManaged(info.ParameterType)).ToArray();
             ManagedInfo managedInfo;
             var managedType = managedAttribute.ManagedType;
             switch (managedType)
@@ -49,6 +44,14 @@ namespace GGM.Context
 
             mManagedInfos[type] = managedInfo;
             return managedInfo.Object;
+        }
+
+        protected virtual ParameterInfo[] GetInjectedParameters(Type type)
+        {
+            var constructorInfo = type.GetConstructors().FirstOrDefault(info => info.IsDefined(typeof(AutoWiredAttribute)));
+            if (constructorInfo == null)
+                Console.WriteLine($"{type}의 AutoWired 생성자가 없어 기본 생성자를 사용합니다.");
+            return constructorInfo?.GetParameters() ?? new ParameterInfo[] { };
         }
     }
 }
