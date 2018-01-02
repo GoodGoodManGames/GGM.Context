@@ -9,6 +9,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GGMContext\GGMContext.csproj" />
+    <ProjectReference Include="..\GGM.Context\GGM.Context.csproj" />
+    <ProjectReference Include="..\GGM.Context\GGM.Context.csproj" />
   </ItemGroup>
 </Project>
