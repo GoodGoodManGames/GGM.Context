@@ -9,22 +9,50 @@ namespace UnitTest
     {
         public ManagedContextTest(ITestOutputHelper output)
         {
-            Output = output;
-            mContext = new ManagedContext();
+            _context = new ManagedContext();
         }
 
-        public static ITestOutputHelper Output;
-        private readonly ManagedContext mContext;
+        private readonly ManagedContext _context;
 
         [Fact]
-        public void ManagedContextGetObjectTest()
+        public void CreateProtoManaged()
         {
-            var managed = mContext.GetManaged<SingletonManaged_1>();
-            var managed1 = mContext.GetManaged<SingletonManaged_1>();
-            var managed2 = mContext.GetManaged<SingletonManaged_1>();
-            Assert.NotNull(managed);
-            Assert.Equal(managed, managed1);
-            Assert.Equal(managed1, managed2);
+            var protoManaged = _context.GetManaged<ProtoManaged>();
+            Assert.NotNull(protoManaged);
+        }
+
+        [Fact]
+        public void CreateSingletonManaged()
+        {
+            var singletonManaged = _context.GetManaged<SingletonManaged>();
+            Assert.NotNull(singletonManaged);
+        }
+
+        [Fact]
+        public void CheckProtoReferenceEqual()
+        {
+            var protoManaged_0 = _context.GetManaged<ProtoManaged>();
+            var protoManaged_1 = _context.GetManaged<ProtoManaged>();
+            Assert.NotEqual(protoManaged_0, protoManaged_1);
+        }
+
+        [Fact]
+        public void CheckSingletonReferenceEqual()
+        {
+            var singletonManaged_0 = _context.GetManaged<SingletonManaged>();
+            var singletonManaged_1 = _context.GetManaged<SingletonManaged>();
+            Assert.Equal(singletonManaged_0, singletonManaged_1);
+        }
+
+        [Fact]
+        public void CheckAutoWired()
+        {
+            var singletonManaged = _context.GetManaged<SingletonManaged>();
+            Assert.NotNull(singletonManaged.ProtoManaged0);
+            Assert.NotNull(singletonManaged.ProtoManaged1);
+            Assert.NotNull(singletonManaged.SingletonManaged1);
+            Assert.NotEqual(singletonManaged.ProtoManaged0, singletonManaged.ProtoManaged1);
+            Assert.Equal(singletonManaged.SingletonManaged0, singletonManaged.SingletonManaged1);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace GGM.Context.Factory
     public class ManagedFactory : IFactory
     {
         private delegate object Ganerator(object[] parameters);
-        private Dictionary<Type, Ganerator> mGenerators = new Dictionary<Type, Ganerator>();
+        private readonly Dictionary<Type, Ganerator> _generators = new Dictionary<Type, Ganerator>();
 
         /// <summary>
         ///     객체를 생성합니다.
@@ -32,20 +32,20 @@ namespace GGM.Context.Factory
         /// <summary>
         ///     객체를 생성합니다.
         /// </summary>
-        /// <typeparam name="T">생성할 클래스 다입</typeparam>
+        /// <typeparam name="T">생성할 클래스 타입</typeparam>
         /// <param name="parameters">생성시 사용될 인자</param>
         /// <returns>생성된 객체</returns>
         public virtual T Create<T>(object[] parameters = null) where T : class => Create(typeof(T), parameters) as T;
 
         private Ganerator GetCachedGeneratorInternal(Type type, object[] parameters)
         {
-            if (mGenerators.ContainsKey(type))
-                return mGenerators[type];
+            if (_generators.ContainsKey(type))
+                return _generators[type];
 
-            var parameterTypes = parameters != null ? parameters.Select(param => param.GetType()).ToArray() : Type.EmptyTypes;
-
+            // 사용될 생성자를 찾기 위해 인자값들을 이용하여 타입을 가져옴.
+            var parameterTypes = parameters?.Select(param => param.GetType()).ToArray() ?? Type.EmptyTypes;
             var constructor = type.GetConstructor(parameterTypes);
-            if (constructor == null) throw new CreateManagedException(CreateManagedError.NotExistMatchedConstructor);
+            CreateManagedException.Check(constructor == null, CreateManagedError.NotExistMatchedConstructor);
 
             var parameterInfos = constructor.GetParameters();
 
@@ -64,7 +64,7 @@ namespace GGM.Context.Factory
             il.Emit(Newobj, constructor);
             il.Emit(Ret);
 
-            return mGenerators[type] = dm.CreateDelegate(typeof(Ganerator)) as Ganerator;
+            return _generators[type] = dm.CreateDelegate(typeof(Ganerator)) as Ganerator;
         }
     }
 }

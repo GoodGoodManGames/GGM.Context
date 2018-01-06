@@ -8,22 +8,22 @@ namespace UnitTest
     {
         public ManagedFactoryTest()
         {
-            mFactory = new ManagedFactory();
+            _factory = new ManagedFactory();
         }
 
-        private readonly ManagedFactory mFactory;
+        private readonly ManagedFactory _factory;
 
         [Fact]
         public void DefaultConstructorFactoryTest()
         {
-            var defaultConstructorObject = mFactory.Create<DefaultConstructorClass>();
+            var defaultConstructorObject = _factory.Create<DefaultConstructorClass>();
             Assert.NotNull(defaultConstructorObject);
         }
 
         [Fact]
         public void ConstructorFactoryTest()
         {
-            var constructorObject = mFactory.Create<ConstructorClass>(new object[] { 3, "asd" });
+            var constructorObject = _factory.Create<ConstructorClass>(new object[] { 3, "asd" });
             Assert.NotNull(constructorObject);
         }
     }

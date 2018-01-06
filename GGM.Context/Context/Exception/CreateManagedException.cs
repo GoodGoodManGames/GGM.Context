@@ -16,5 +16,11 @@
         }
 
         public CreateManagedError CreateManagedError { get; }
+        
+        public static void Check(bool condition, CreateManagedError createManagedException)
+        {
+            if (condition != true)
+                throw new CreateManagedException(createManagedException);
+        }
     }
 }
