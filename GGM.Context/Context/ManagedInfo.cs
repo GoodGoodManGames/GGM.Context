@@ -3,9 +3,9 @@ using System;
 
 namespace GGM.Context
 {
-    internal class ManagedInfo
+    public class ManagedInfo
     {
-        internal ManagedInfo(Type type, ManagedAttribute managedAttribute, Func<object> generator)
+        public ManagedInfo(Type type, ManagedAttribute managedAttribute, Func<object> generator)
         {
             Type = type;
             ManagedAttribute = managedAttribute;
