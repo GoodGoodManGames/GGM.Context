@@ -4,5 +4,18 @@
     <ApplicationIcon />
     <OutputType>Library</OutputType>
     <StartupObject />
+    <Description>GoodGoodManGames에서 사용하는 의존성 주입 라이브러리입니다.</Description>
+    <PackageLicenseUrl>https://github.com/GoodGoodManGames/GGM.Context/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/GoodGoodManGames/GGM.Context</PackageProjectUrl>
+    <PackageIconUrl>https://avatars1.githubusercontent.com/u/32609950?s=200&amp;v=4</PackageIconUrl>
+    <RepositoryUrl>https://github.com/GoodGoodManGames/GGM.Context</RepositoryUrl>
+    <PackageTags>GGM</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>GGMContext</PackageId>
+    <Version>1.5.0</Version>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netcoreapp2.0\GGM.Context.xml</DocumentationFile>
+    <Optimize>false</Optimize>
   </PropertyGroup>
 </Project>
