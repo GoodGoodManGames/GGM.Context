@@ -19,7 +19,7 @@
         
         public static void Check(bool condition, CreateManagedError createManagedException)
         {
-            if (condition != true)
+            if (!condition)
                 throw new CreateManagedException(createManagedException);
         }
     }

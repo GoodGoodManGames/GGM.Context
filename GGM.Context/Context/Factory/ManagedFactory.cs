@@ -45,7 +45,7 @@ namespace GGM.Context.Factory
             // 사용될 생성자를 찾기 위해 인자값들을 이용하여 타입을 가져옴.
             var parameterTypes = parameters?.Select(param => param.GetType()).ToArray() ?? Type.EmptyTypes;
             var constructor = type.GetConstructor(parameterTypes);
-            CreateManagedException.Check(constructor == null, CreateManagedError.NotExistMatchedConstructor);
+            CreateManagedException.Check(constructor != null, CreateManagedError.NotExistMatchedConstructor);
 
             var parameterInfos = constructor.GetParameters();
 
