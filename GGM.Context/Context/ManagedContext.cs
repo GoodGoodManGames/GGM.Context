@@ -81,17 +81,19 @@ namespace GGM.Context
             return managedInfo.Object;
         }
 
+        public virtual object Create(BaseManagedDefinition definition, object[] parameters) => definition.Generate(parameters);
+
         private ManagedInfo CreateManagedInfo(BaseManagedDefinition definition, object[] parameters)
         {
             ManagedInfo managedInfo;
             switch (definition.ManagedType)
             {
                 case ManagedType.Singleton:
-                    var managed = definition.Generate(parameters);
+                    var managed = Create(definition, parameters);
                     managedInfo = new ManagedInfo(definition.TargetType, () => managed);
                     break;
                 case ManagedType.Proto:
-                    managedInfo = new ManagedInfo(definition.TargetType, () => definition.Generate(parameters));
+                    managedInfo = new ManagedInfo(definition.TargetType, () => Create(definition, parameters));
                     break;
                 default: throw new CreateManagedException(CreateManagedError.UnsupportedManagedType);
             }

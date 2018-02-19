@@ -6,7 +6,7 @@ namespace GGM.Context
     /// Managed 생성에 대한 정보를 가지고 있는 클래스입니다.
     /// Configuration으로 등록된 경우엔 configuration을 가집니다.
     /// </summary>
-    internal abstract class BaseManagedDefinition
+    public abstract class BaseManagedDefinition
     {
         protected delegate object Generator(object[] parameters);
         
