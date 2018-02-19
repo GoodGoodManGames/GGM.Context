@@ -12,7 +12,7 @@
     <PackageTags>GGM</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>GGMContext</PackageId>
-    <Version>1.5.1</Version>
+    <Version>2.0.0-pre</Version>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>bin\Debug\netcoreapp2.0\GGM.Context.xml</DocumentationFile>
