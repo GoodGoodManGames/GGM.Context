@@ -13,8 +13,9 @@ namespace GGM.Context
     {
         private List<BaseManagedDefinition> _managedDefinitions = new List<BaseManagedDefinition>(128);
         private readonly Dictionary<Type, ManagedInfo> _managedInfos = new Dictionary<Type, ManagedInfo>();
+        private HashSet<Assembly> _registeredAssemblies = new HashSet<Assembly>();
 
-        public virtual void Register(Type registerType)
+        private void Register(Type registerType)
         {
             RemoveDefinitionIfExist(registerType);
 
@@ -41,6 +42,14 @@ namespace GGM.Context
                     _managedDefinitions.Add(configurationDefinition);
                 }
             }
+        }
+        
+        public virtual void Register(Assembly assembly)
+        {
+            _registeredAssemblies.Add(assembly);
+            var types = assembly.GetTypes().Where(item => item.IsDefined(typeof(ManagedAttribute)));
+            foreach (var type in types)
+                Register(type);
         }
 
         private void RemoveDefinitionIfExist(Type targetType)
@@ -69,6 +78,9 @@ namespace GGM.Context
         /// <returns>질의된 객체</returns>
         public virtual object GetManaged(Type type)
         {
+            if(!_registeredAssemblies.Contains(type.Assembly))
+                Register(type.Assembly);
+            
             if (_managedInfos.TryGetValue(type, out var cachedManagedInfo))
                 return cachedManagedInfo.Object;
 

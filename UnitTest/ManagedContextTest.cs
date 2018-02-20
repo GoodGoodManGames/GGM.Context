@@ -10,11 +10,7 @@ namespace UnitTest
         public ManagedContextTest(ITestOutputHelper output)
         {
             _context = new ManagedContext();
-            _context.Register(typeof(ProtoManaged));
-            _context.Register(typeof(ProtoManaged_1));
-            _context.Register(typeof(SingletonManaged));
-            _context.Register(typeof(SingletonManaged_1));
-            _context.Register(typeof(TestConfiguration));
+            _context.Register(typeof(ManagedContextTest).Assembly);
         }
 
         private readonly ManagedContext _context;
