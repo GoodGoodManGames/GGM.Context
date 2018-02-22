@@ -9,26 +9,32 @@ namespace GGM.Context
     using Exception;
     using Util;
 
-
-    internal class ConstructorManagedDefinition : BaseManagedDefinition
+    /// <summary>
+    /// 생성자를 이용한 ManagedDefinition입니다.
+    /// </summary>
+    internal sealed class ConstructorManagedDefinition : BaseManagedDefinition
     {
-        public ConstructorManagedDefinition(Type targetType, ConstructorInfo constructorInfo)
-            : base(targetType, constructorInfo.GetParameterTypes())
+        public ConstructorManagedDefinition(ConstructorInfo constructorInfo)
+            : base(constructorInfo.DeclaringType)
         {
+            if(constructorInfo == null)
+                throw new ArgumentNullException(nameof(constructorInfo));
+
             var managedAttribute = TargetType.GetCustomAttribute<ManagedAttribute>();
             CreateManagedException.Check(managedAttribute != null, CreateManagedError.NotManagedClass);
             ManagedType = managedAttribute.ManagedType;
+            
+            NeedParameterTypes = constructorInfo.GetParameterTypes();
 
-
-            var dynamicMethod = new DynamicMethod($"{TargetType.Name}Factory+{Guid.NewGuid()}", typeof(object), new[] {typeof(object[])});
+            var dynamicMethod = new DynamicMethod(GeneratorName, typeof(object), new[] {typeof(object[])});
             var il = dynamicMethod.GetILGenerator();
-            for (int i = 0; i < ParameterTypes.Length; i++)
+            for (int i = 0; i < NeedParameterTypes.Length; i++)
             {
                 il.Emit(Ldarg_0);
                 il.Emit(Ldc_I4, i);
                 il.Emit(Ldelem_Ref);
 
-                var parameterType = ParameterTypes[i];
+                var parameterType = NeedParameterTypes[i];
                 if (parameterType.IsValueType)
                     il.Emit(Unbox_Any, parameterType);
             }
@@ -40,7 +46,7 @@ namespace GGM.Context
         }
 
         public override ManagedType ManagedType { get; }
-        public override Type[] NeedParameterTypes => ParameterTypes;
+        public override Type[] NeedParameterTypes { get; }
         protected override Generator ManagedGenerator { get; }
     }
 }

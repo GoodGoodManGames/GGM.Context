@@ -9,38 +9,44 @@ namespace GGM.Context
     using Exception;
     using Util;
 
-    internal class ConfigurationManagedDefinition : BaseManagedDefinition
+    /// <summary>
+    /// Configuration의 Factory메소드를 이용한 ManagedDefinition입니다.
+    /// </summary>
+    internal sealed class ConfigurationManagedDefinition : BaseManagedDefinition
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="targetType"></param>
-        /// <param name="configurationType"></param>
-        /// <param name="methodInfo"></param>
-        /// <param name="parameterTypes"></param>
-        public ConfigurationManagedDefinition(Type configurationType, MethodInfo methodInfo)
-            : base(methodInfo.ReturnType, methodInfo.GetParameterTypes())
+        
+        public ConfigurationManagedDefinition(MethodInfo methodInfo)
+            : base(methodInfo.ReturnType)
         {
-            _configurationType = configurationType;
-            _methodInfo = methodInfo;
-            var managedAttribute = _methodInfo.GetCustomAttribute<ManagedAttribute>();
+            if(methodInfo == null)
+                throw new ArgumentNullException(nameof(methodInfo));
+            
+            var managedAttribute = methodInfo.GetCustomAttribute<ManagedAttribute>();
             CreateManagedException.Check(managedAttribute != null, CreateManagedError.NotManagedClass);
-
             ManagedType = managedAttribute.ManagedType;
+            
+            var configurationType = methodInfo.DeclaringType;
 
-            var dynamicMethod = new DynamicMethod($"{TargetType.Name}Factory+{Guid.NewGuid()}", typeof(object), new[] {typeof(object[])});
+            // FactoryMethod 등록시에는 NeedParameterTypes의 첫번째에 해당 메소드의 DeclaringType이 들어간다.
+            var parameterTypes = methodInfo.GetParameterTypes();
+            NeedParameterTypes = new Type[1 + parameterTypes.Length];
+            NeedParameterTypes[0] = configurationType;
+            for (int i = 0; i < parameterTypes.Length; i++)
+                NeedParameterTypes[i + 1] = parameterTypes[i];
+
+            var dynamicMethod = new DynamicMethod(GeneratorName, typeof(object), new[] {typeof(object[])});
             var il = dynamicMethod.GetILGenerator();
             il.Emit(Ldarg_0);
             il.Emit(Ldc_I4_0);
             il.Emit(Ldelem_Ref);
 
-            for (int i = 0; i < ParameterTypes.Length; i++)
+            for (int i = 0; i < parameterTypes.Length; i++)
             {
                 il.Emit(Ldarg_0);
                 il.Emit(Ldc_I4, i + 1);
                 il.Emit(Ldelem_Ref);
 
-                var parameterType = ParameterTypes[i];
+                var parameterType = parameterTypes[i];
                 if (parameterType.IsValueType)
                     il.Emit(Unbox_Any, parameterType);
             }
@@ -51,28 +57,8 @@ namespace GGM.Context
             ManagedGenerator = dynamicMethod.CreateDelegate(typeof(Generator)) as Generator;
         }
 
-        private readonly Type _configurationType;
-        private readonly MethodInfo _methodInfo;
-
-        private Type[] _needParameterTypes;
         public override ManagedType ManagedType { get; }
-
-        public override Type[] NeedParameterTypes
-        {
-            get
-            {
-                if (_needParameterTypes == null)
-                {
-                    _needParameterTypes = new Type[1 + ParameterTypes.Length];
-                    _needParameterTypes[0] = _configurationType;
-                    for (int i = 0; i < ParameterTypes.Length; i++)
-                        _needParameterTypes[i + 1] = ParameterTypes[i];
-                }
-
-                return _needParameterTypes;
-            }
-        }
-
+        public override Type[] NeedParameterTypes { get; }
         protected override Generator ManagedGenerator { get; }
     }
 }

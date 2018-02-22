@@ -11,10 +11,40 @@ namespace GGM.Context
 
     public class ManagedContext
     {
-        private List<BaseManagedDefinition> _managedDefinitions = new List<BaseManagedDefinition>(128);
-        private readonly Dictionary<Type, ManagedInfo> _managedInfos = new Dictionary<Type, ManagedInfo>();
-        private HashSet<Assembly> _registeredAssemblies = new HashSet<Assembly>();
+        private readonly List<BaseManagedDefinition> _definitions = new List<BaseManagedDefinition>(128);
+        private readonly Dictionary<Type, Func<object>> _managedGetters = new Dictionary<Type, Func<object>>();
+        private readonly HashSet<Assembly> _registeredAssemblies = new HashSet<Assembly>();
 
+        
+
+        /// <summary>
+        /// Assembly를 Context에 등록합니다, Context는 해당 Assembly의 모든 타입 중 ManagedAttribute가 걸린 클래스들을 ManagedDefinition으로 만들어 저장합니다.
+        /// </summary>
+        /// <param name="assembly">등록할 Assembly</param>
+        public virtual void Register(Assembly assembly)
+        {
+            if(assembly == null)
+                throw new ArgumentNullException(nameof(assembly));
+            
+            _registeredAssemblies.Add(assembly);
+            var types = assembly.GetTypes().Where(item => item.IsDefined(typeof(ManagedAttribute)));
+            foreach (var type in types)
+                Register(type);
+        }
+
+        #region void Register(Type registerType)
+
+        private void RemoveDefinitionIfExist(Type targetType)
+        {
+            bool IsRegisted(BaseManagedDefinition definition) => definition.TargetType == targetType;
+
+            if (!_definitions.Exists(IsRegisted)) 
+                return;
+            
+            // 이미 등록된 타입이면 지움
+            _definitions.RemoveAll(IsRegisted);
+        }
+        
         private void Register(Type registerType)
         {
             RemoveDefinitionIfExist(registerType);
@@ -22,13 +52,10 @@ namespace GGM.Context
             // ConstructorDefinition 생성
             var constructorInfo = registerType.GetConstructors().FirstOrDefault(info => info.IsDefined(typeof(AutoWiredAttribute)));
             if (constructorInfo == null)
-            {
-                Console.WriteLine($"{registerType}의 AutoWired 생성자가 없습니다, 이는 기본 생성자를 사용합니다.");
                 constructorInfo = registerType.GetConstructor(Type.EmptyTypes);
-            }
 
-            var constructorDefinition = new ConstructorManagedDefinition(registerType, constructorInfo);
-            _managedDefinitions.Add(constructorDefinition);
+            var constructorDefinition = new ConstructorManagedDefinition(constructorInfo);
+            _definitions.Add(constructorDefinition);
 
             // 해당 타입이 Configuration 클래스인 경우면 메소드들을 등록해준다
             if (registerType.IsDefined(typeof(ConfigurationAttribute)))
@@ -38,31 +65,13 @@ namespace GGM.Context
                 {
                     RemoveDefinitionIfExist(methodInfo.ReturnType);
 
-                    var configurationDefinition = new ConfigurationManagedDefinition(registerType, methodInfo);
-                    _managedDefinitions.Add(configurationDefinition);
+                    var configurationDefinition = new ConfigurationManagedDefinition(methodInfo);
+                    _definitions.Add(configurationDefinition);
                 }
             }
         }
-        
-        public virtual void Register(Assembly assembly)
-        {
-            _registeredAssemblies.Add(assembly);
-            var types = assembly.GetTypes().Where(item => item.IsDefined(typeof(ManagedAttribute)));
-            foreach (var type in types)
-                Register(type);
-        }
 
-        private void RemoveDefinitionIfExist(Type targetType)
-        {
-            bool IsRegisted(BaseManagedDefinition definition) => definition.TargetType == targetType;
-
-            // 이미 등록된 타입이면 지움
-            if (_managedDefinitions.Exists(IsRegisted))
-            {
-                Console.WriteLine($"{targetType.FullName}은 이미 Register된 타입입니다. 나중에 지정된 타입을 사용합니다.");
-                _managedDefinitions.RemoveAll(IsRegisted);
-            }
-        }
+        #endregion Register
 
         /// <summary>
         /// 객체를 질의합니다.
@@ -78,39 +87,62 @@ namespace GGM.Context
         /// <returns>질의된 객체</returns>
         public virtual object GetManaged(Type type)
         {
-            if(!_registeredAssemblies.Contains(type.Assembly))
-                Register(type.Assembly);
+            if(type == null)
+                throw new ArgumentNullException(nameof(type));
             
-            if (_managedInfos.TryGetValue(type, out var cachedManagedInfo))
-                return cachedManagedInfo.Object;
+            // 아직 등록되지 않은 Assembly면 등록
+            if (!_registeredAssemblies.Contains(type.Assembly))
+                Register(type.Assembly);
 
-            var definition = _managedDefinitions.FirstOrDefault(info => info.TargetType == type);
+            // 이미 만들어둔 getter가 있으면 새로 만들지 않음.
+            if (_managedGetters.TryGetValue(type, out var cachedManagedGetter))
+                return cachedManagedGetter();
+
+            
+            var definition = _definitions.FirstOrDefault(info => info.TargetType == type);
             CreateManagedException.Check(definition != null, CreateManagedError.NotManagedClass);
 
             var parameters = definition.NeedParameterTypes.Select(GetManaged).ToArray();
-            ManagedInfo managedInfo = CreateManagedInfo(definition, parameters);
-            _managedInfos[type] = managedInfo;
-            return managedInfo.Object;
+            Func<object> managedGetter = CreateGetter(definition, parameters);
+            _managedGetters[type] = managedGetter;
+            return managedGetter();
         }
 
-        public virtual object Create(BaseManagedDefinition definition, object[] parameters) => definition.Generate(parameters);
-
-        private ManagedInfo CreateManagedInfo(BaseManagedDefinition definition, object[] parameters)
+        /// <summary>
+        /// definition을 이용하여 객체를 생성합니다. 
+        /// </summary>
+        /// <param name="definition">사용할 definition</param>
+        /// <param name="parameters">definition이 사용할 인자</param>
+        /// <returns>definition이 생성한 객체</returns>
+        public virtual object Create(BaseManagedDefinition definition, object[] parameters)
         {
-            ManagedInfo managedInfo;
+            if(definition == null)
+                throw new ArgumentNullException(nameof(definition));
+            if(parameters == null)
+                throw new ArgumentNullException(nameof(parameters));
+            
+            return definition.Generate(parameters); 
+        }
+
+        private Func<object> CreateGetter(BaseManagedDefinition definition, object[] parameters)
+        {
+            Func<object> managedGetter;
             switch (definition.ManagedType)
             {
                 case ManagedType.Singleton:
+                    // 싱글턴인 경우 객체를 만든 뒤 캡쳐
                     var managed = Create(definition, parameters);
-                    managedInfo = new ManagedInfo(definition.TargetType, () => managed);
+                    managedGetter = () => managed;
                     break;
                 case ManagedType.Proto:
-                    managedInfo = new ManagedInfo(definition.TargetType, () => Create(definition, parameters));
+                    // 프로토인 경우 객체를 만드는 것을 캡쳐
+                    managedGetter = () => Create(definition, parameters);
                     break;
-                default: throw new CreateManagedException(CreateManagedError.UnsupportedManagedType);
+                default: 
+                    throw new CreateManagedException(CreateManagedError.UnsupportedManagedType);
             }
 
-            return managedInfo;
+            return managedGetter;
         }
     }
 }
