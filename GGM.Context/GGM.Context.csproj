@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
     <ApplicationIcon />
     <OutputType>Library</OutputType>
     <StartupObject />
@@ -12,7 +12,7 @@
     <PackageTags>GGM</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>GGMContext</PackageId>
-    <Version>2.0.0-pre3</Version>
+    <Version>2.0.0-pre4</Version>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>bin\Debug\netcoreapp2.0\GGM.Context.xml</DocumentationFile>
