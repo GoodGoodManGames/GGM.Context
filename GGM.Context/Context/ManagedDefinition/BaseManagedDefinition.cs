@@ -16,7 +16,7 @@ namespace GGM.Context
         /// 객체를 생성하는 Delegate입니다.
         /// </summary>
         /// <param name="parameters">객체 생성 인자</param>
-        protected delegate object Generator(object[] parameters);
+        protected delegate object Generator(params object[] parameters);
         
         /// <summary>
         /// 

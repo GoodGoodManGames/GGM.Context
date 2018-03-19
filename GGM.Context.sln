@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGM.Context", "GGM.Context/
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{170960AF-7B1E-4805-B237-62C2D4957122}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGM.Context.Test", "GGM.Context.Test\GGM.Context.Test.csproj", "{53468E9A-8699-4384-A073-D9EE3D7966B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{170960AF-7B1E-4805-B237-62C2D4957122}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{170960AF-7B1E-4805-B237-62C2D4957122}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{170960AF-7B1E-4805-B237-62C2D4957122}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53468E9A-8699-4384-A073-D9EE3D7966B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53468E9A-8699-4384-A073-D9EE3D7966B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53468E9A-8699-4384-A073-D9EE3D7966B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53468E9A-8699-4384-A073-D9EE3D7966B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

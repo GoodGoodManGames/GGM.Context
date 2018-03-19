@@ -26,7 +26,7 @@ namespace GGM.Context
             
             NeedParameterTypes = constructorInfo.GetParameterTypes();
 
-            var dynamicMethod = new DynamicMethod(GeneratorName, typeof(object), new[] {typeof(object[])});
+            var dynamicMethod = new DynamicMethod(GeneratorName, typeof(object), new[] {typeof(object[])}, TargetType);
             var il = dynamicMethod.GetILGenerator();
             for (int i = 0; i < NeedParameterTypes.Length; i++)
             {
@@ -37,6 +37,8 @@ namespace GGM.Context
                 var parameterType = NeedParameterTypes[i];
                 if (parameterType.IsValueType)
                     il.Emit(Unbox_Any, parameterType);
+                else
+                    il.Emit(Castclass, parameterType);
             }
 
             il.Emit(Newobj, constructorInfo);

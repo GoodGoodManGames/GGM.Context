@@ -39,7 +39,8 @@ namespace GGM.Context
             il.Emit(Ldarg_0);
             il.Emit(Ldc_I4_0);
             il.Emit(Ldelem_Ref);
-
+            il.Emit(Castclass, configurationType);
+            
             for (int i = 0; i < parameterTypes.Length; i++)
             {
                 il.Emit(Ldarg_0);
@@ -49,6 +50,8 @@ namespace GGM.Context
                 var parameterType = parameterTypes[i];
                 if (parameterType.IsValueType)
                     il.Emit(Unbox_Any, parameterType);
+                else
+                    il.Emit(Castclass, parameterType);
             }
 
             il.Emit(Call, methodInfo);
