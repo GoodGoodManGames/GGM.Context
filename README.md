@@ -97,9 +97,7 @@ public class TemplateConfiguration
 public class WebService : IService
 {
     // 더이상 Factory를 요청할 필요 없이 Resolver 객체 자신을 요청하면 된다.
-    public WebService(RazorTemplateResolver resolver
-        , /* */)
-)
+    public WebService(RazorTemplateResolver resolver, /* */)
     {
         /* */
         if (resolver != null)
