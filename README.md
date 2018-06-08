@@ -21,7 +21,7 @@ DI 시 (Reflaction을 이용한)동적 메소드 호출의 성능 저하를 최�
 GGMContext에 의해 생성되고, 관리되는 객체의 클래스를 ManagedClass라고 합니다.
 이는 ApplicationContext의 Scan의 대상이 됩니다. ManagedClass가 지정된 클래스들은 Lookup되어 DI에 사용됩니다.
 
-## Example
+#### Example
 ```cs
 
 [Managed(ManagedClassType.Singleton)] // ApplicationContext에 의해 생성되어 Lookup된다.
@@ -63,4 +63,48 @@ public static void Main(string[] args)
     Console.WriteLine(testController.proto == proto); // false
 }
 
+```
+
+## Configuration
+
+Spring의 Configuration과 유사한 기능을 합니다.
+
+ConfigurationAttribute가 지정된 클래스는 Managed로 취급되며, ManagedType.Singleton을 미리 생성하기 전에 먼저 생성됩니다.
+
+이후 메소드의 정보를 이용하여 객체 생성 요청 시 해당 클래스가 Configuration의 메소드의 return 자료형에 해당한다면 해당 메소드를 이용하여 객체를 생성해줍니다.
+
+#### Example
+
+```csharp
+public class RazorTemplateResolver : ITemplateResolver
+{
+    private readonly RazorLightEngine mEngine;
+
+    public RazorTemplateResolver(string resourcePath) { /* */ }
+}
+
+
+[Configuration]
+public class TemplateConfiguration
+{
+    // Configuration 도 Managed이기 때문에 Managed의 특징을 이용할 수 있다.
+    [Config("TempleteResolver.Path")]
+    public string ConfigPath { get; set; }
+    
+    public RazorTempleteResolver Create() { return new RazorTempleteResolver(ConfigPath); }
+}
+
+public class WebService : IService
+{
+    // 더이상 Factory를 요청할 필요 없이 Resolver 객체 자신을 요청하면 된다.
+    public WebService(RazorTemplateResolver resolver
+        , /* */)
+)
+    {
+        /* */
+        if (resolver != null)
+            TempleteResolver = resolver;
+        /* */
+    }
+}
 ```
